@@ -1,16 +1,21 @@
 import os
 
+import streamlit
+import plotly.io as pio
 from model.InfoActa import InfoActa
 from datetime import datetime
 from controller.ControladorPDF import ControladorPdf
+from controller.Controlador import Controlador
+from model.Estadisticas import  Estadistica
 
 # Este archivo contiene las funcionalidades de la vista relacionado con la evaluación de las actas
 
 
-def agregar_acta(st, controlador):
+def agregar_acta(st, controlador, interno=0, externo=0):
+
     st.title("Generación De Actas")
     col1, col2, col3 = st.columns(3)
-    col5, col6, col7, col8 = st.columns(4)
+    col5, col6, col7, col8, col9= st.columns(5)
     # Objeto que modelará el formulario
     info_acta_obj = InfoActa(controlador.criterios)
     info_acta_obj.fecha_acta = datetime.today().strftime('%Y-%m-%d')
@@ -21,13 +26,32 @@ def agregar_acta(st, controlador):
     with col3:
         info_acta_obj.tipo_trabajo = st.selectbox('Tipo', ('Aplicado', 'Investigación'))
     with col5:
-        info_acta_obj.director = st.text_input("Director")
+        info_acta_obj.director = st.selectbox("Director", (controlador.Mostrar_lista_directores()))
     with col6:
         info_acta_obj.codirector = st.text_input("Codirector", "N.A")
     with col7:
         info_acta_obj.jurado1 = st.text_input("Jurado #1")
+        if streamlit.checkbox("#1: Interno") == True:
+           info_acta_obj.jurado1 = "Interno"
+           info_acta_obj.tipojurado1=1
+
+        else:
+            info_acta_obj.jurado1 = "Externo"
+            info_acta_obj.tipojurado1 = 0
+
+
+
+
     with col8:
         info_acta_obj.jurado2 = st.text_input("Jurado #2")
+        if streamlit.checkbox("#2: Interno")==True:
+           info_acta_obj.jurado2 = "Interno"
+           info_acta_obj.tipojurado2 = 1
+        else:
+            info_acta_obj.jurado2 = "Externo"
+            info_acta_obj.tipojurado2 = 0
+    with col9:
+        info_acta_obj.fechaPresentacion = st.text_input("Fecha de presentacion")
     enviado_btn = st.button("Enviar")
 
     # Cuando se oprime el botón se agrega a la lista
@@ -43,6 +67,34 @@ def agregar_acta(st, controlador):
     # entonces de esta manera se actualiza el controlador en la vista principal
     return controlador
 
+def estadisticas(st, controlador):
+    interno = 0
+    externo = 0
+    st.title("Info proyectos de grado")
+    contadorActasRegistradasAplicado = 0
+    contadorActasRegistradasNoAplicado = 0
+    for acta in controlador.actas:
+        if acta.tipo_trabajo == 'Aplicado':
+            contadorActasRegistradasAplicado += 1
+        else:
+            contadorActasRegistradasNoAplicado +=1
+        if acta.tipojurado1 == 1:
+            interno += 1
+        else:
+            externo += 1
+        if acta.tipojurado2 == 1:
+            interno +=1
+        else:
+            externo += 1
+    st.write("Actas registradas Aplicadas: ", contadorActasRegistradasAplicado)
+    st.write("Actas registradas No Aplicadas: ", contadorActasRegistradasNoAplicado)
+    st.write("Cantidad de proyectos de grado con jurados internos: ", interno)
+    st.write("Cantidad de proyectos de grado con jurados externos: ", externo)
+
+
+
+
+
 
 def ver_historico_acta(st, controlador):
     st.title("Histórico")
@@ -56,7 +108,7 @@ def ver_historico_acta(st, controlador):
         numero += 1
         col1, col2, col3, col4 = st.columns(4)
         col5, col6, col7, col8 = st.columns(4)
-        col9, col10 = st.columns(2)
+        col9, col10, col11 = st.columns(3)
         with col1:
             st.write("**Autor**")
             st.write(acta.autor)
@@ -95,6 +147,9 @@ def ver_historico_acta(st, controlador):
                 st.write("Acta pendiente por calificar")
             else:
                 st.write("Acta calificada")
+        with col11:
+            st.write("Fecha Presentacion: ")
+            st.write(acta.fechaPresentacion)
 
 
 def evaluar_criterios(st, controlador):
@@ -114,6 +169,8 @@ def evaluar_criterios(st, controlador):
                 nota_jurado2 = st.number_input(str(num) + ". Nota Jurado 2", 0.0, 5.0)
                 criterio.nota = ((nota_jurado1 + nota_jurado2) / 2) * criterio.porcentaje
                 criterio.observacion = st.text_input(str(num) + ". Observación", "Sin Comentarios.")
+                criterio.adicionales = st.text_input(str(num) + ". Observaciones adicionales/Restricciones para la calificación final", "Sin comentarios")
+
                 temp += criterio.nota
                 num += 1
             if temp > 3.5:
@@ -142,6 +199,19 @@ def evaluar_criterios(st, controlador):
         else:
             st.info("Llene Todos Los Campos Vacíos.")
 
+def generarGrafica(st, controlador):
+    Nombres = []
+    nota = []
+    for acta in controlador.actas:
+        Nombres.append(acta.autor)
+        nota.append(acta.nota_final)
+    fig = dict({
+            "data": [{"type": "bar",
+                    "x": Nombres,
+                    "y": nota}],
+            "layout": {"title": {"text": "Estudiantes en función de sus notas"}}
+    })
+    pio.show(fig)
 
 def exportar_acta(st, controlador):
     st.title("Generación de PDF")

@@ -54,7 +54,7 @@ encargada este efectuara y tendrá disponibilidad de diversas funciones, siendo 
      * Juan Pablo García
      * Frank Martinez
      * Carlos Ramirez
-5. Modifique el programa para que cuando se crea el acta el usuario pueda escoger un director de la lista de directores 
+5. Modifique el programa para que cuando se cree el acta el usuario pueda escoger un director de la lista de directores 
 6. Modifique el programa para que cuando se cre el acta al seleccionar los jurados se pueda seleccionar si lo jurados son internos o externos. Use un checkbox como control de la interfaz gráfica para lograr este comportamiento 
 7. Modifique el programa para que exportar el acta sea una opción nueva en el menú. 
 8. Modifique el pdf para que aparezca como nombre del trabajo el nombre digitado en el formulario de creación de actas. Note que en este momento siempre aparece el mismo texto como se observa en la siguiente imagen.

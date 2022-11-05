@@ -8,7 +8,8 @@ import streamlit as st
 
 from streamlit_option_menu import option_menu
 from controller.Controlador import Controlador
-from view.EvaluacionActaPartial import ver_historico_acta, agregar_acta, evaluar_criterios, exportar_acta
+from view.EvaluacionActaPartial import ver_historico_acta, agregar_acta, evaluar_criterios, exportar_acta, estadisticas, generarGrafica
+
 
 # Este archivo contiene las funcionalidades de la vista relacionado con la evaluación de las actas
 
@@ -42,7 +43,7 @@ class MainView:
         # Definimos lo que abra en la barra de menu
         with st.sidebar:
             st.image("img/LogoJaverianaCali.jpg", width=297)
-            self.menu_actual = option_menu("Menu", ["Inicio", 'Crear acta', 'Evaluar acta', 'Ver históricos'],
+            self.menu_actual = option_menu("Menu", ["Inicio", 'Crear acta', 'Evaluar acta','Ver históricos', 'Exportar acta', 'Estadísticas', 'Gráfica Estadísticas'],
                                            icons=['house', 'mortarboard', 'people', 'person-check-fill'], menu_icon="cast", default_index=0)
 
     def mostrar_bienvenida(self):
@@ -66,9 +67,14 @@ class MainView:
             ver_historico_acta(st, self.controller)
         elif self.menu_actual == "Evaluar acta":
             evaluar_criterios(st, self.controller)
-            exportar_acta(st, self.controller)
         elif self.menu_actual == "Ver históricos":
             ver_historico_acta(st, self.controller)
+        elif self.menu_actual == "Exportar acta":
+            exportar_acta(st, self.controller)
+        elif self.menu_actual == "Estadísticas":
+            estadisticas(st, self.controller)
+        elif self.menu_actual == "Gráfica Estadísticas":
+            generarGrafica(st, self.controller)
 
 
 # Main call
